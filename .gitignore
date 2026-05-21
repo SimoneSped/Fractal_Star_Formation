@@ -1,0 +1,5 @@
+# Ignore all files in subfolders of the data folder
+# To be changed, or at least to add a readme in data explaining 
+# the structure required in that area (fine for now)
+ 
+data/**/*
