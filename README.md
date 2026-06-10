@@ -9,10 +9,11 @@ Repository for the software and analysis of column density maps within the frame
 - [ ] Connection to physical models (this is to be discussed)
 
 ## Where to get started
-- `notebooks/` — contains the Jupyter Notebooks where the main analysis using the various scripts take place 
-- `scripts/` — reusable scripts for the analysis
+- `inputs/` — input folder for the input data (both simulations and observations)
+- `notebooks/` — contains the Jupyter Notebooks where the main analysis using the various scripts take place
+- `reports/` — still empty, will be used to note down the main points for easier reporting and discussion  
+- `src/` —  scripts for the analysis
 - `tests/` — still empty, will be used to validate results and validity of methods (as well as checking if the code is working properly)
-- `reports/` — still empty, will be used to note down the main points for easier reporting and discussion 
 
 ## Contributors
 Simone Spedicato (simone.spedicato@univie.ac.at)
