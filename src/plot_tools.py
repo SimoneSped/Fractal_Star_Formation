@@ -493,3 +493,14 @@ def plot_global_fractal_dimension_together(results_OA, results_OB):
 
     # Tight layout for slides
     plt.tight_layout()
+
+def plot_euler_characteristic(results_OA, name_region=""):
+
+    plt.figure(figsize=(9, 9))
+    plt.plot(results_OA["thresholds"], results_OA["euler_chars"], color="blue")
+    plt.xscale("log")
+    plt.xlabel("Column Density Threshold [$\mathrm{cm}^{-2}$]", fontsize=18)
+    plt.ylabel("Euler Characteristic",  fontsize=18)
+    plt.title(f"Euler Characteristic - {name_region}", fontsize=18)
+    plt.grid(True)
+    plt.show()
