@@ -504,3 +504,29 @@ def plot_euler_characteristic(results_OA, name_region=""):
     plt.title(f"Euler Characteristic - {name_region}", fontsize=18)
     plt.grid(True)
     plt.show()
+
+def plot_map_at_thresholds(data, thresholds = None):
+    # Define the color limits based on percentiles
+    data = np.nan_to_num(data, nan=0.0, posinf=0.0, neginf=0.0)
+
+    min_value = np.percentile(data, 2)  # 2nd percentile
+    max_value = np.percentile(data, 98)  # 98th percentile
+
+    if thresholds:
+        for threshold in thresholds:
+            # Create mask for the given threshold
+            mask = data >= threshold
+            masked_data = np.where(mask, data, np.nan)
+
+            # Define the color limits based on percentiles
+            min_value = np.percentile(masked_data[np.isfinite(masked_data)], 2)  # 2nd percentile
+            max_value = np.percentile(masked_data[np.isfinite(masked_data)], 98)  # 98th percentile
+
+            # Plot the mask
+            plt.figure(figsize=(10, 8))
+            plt.imshow(masked_data, vmin=min_value, vmax=max_value, origin='lower', cmap='inferno', interpolation=None)
+
+            plt.title(f"Map with Threshold {threshold:.2e}", fontweight='bold')
+            plt.colorbar(label="Column Density")
+            plt.tight_layout()
+            plt.show()
