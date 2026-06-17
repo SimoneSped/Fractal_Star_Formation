@@ -3,7 +3,10 @@ from scipy.stats import linregress
 import numpy as np
 
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 
+from astropy.coordinates import SkyCoord
+import astropy.units as u
 
 def load_results(results):
 
@@ -463,17 +466,24 @@ def plot_global_fractal_dimension_double_fit(
         "high": fit_high
     }
 
-def plot_global_fractal_dimension_together(results_OA, results_OB):
+def plot_global_fractal_dimension_together(results_OA, results_OB, errors=True):
     plt.figure(figsize=(7, 8))
 
     # Plot with error bars
-    plt.errorbar(results_OA["thresholds"], results_OA["fractal_dimension"], 
-                yerr=results_OA["sigma_D"], fmt='o-', 
-                label="Orion A", color='steelblue', markersize=6, markerfacecolor='none', capsize=3)
+    if errors:
+        plt.errorbar(results_OA["thresholds"], results_OA["fractal_dimension"], 
+                yerr=results_OA["sigma_D"], fmt='o', 
+                    label="Orion A", color='steelblue', markersize=6, markerfacecolor='none', capsize=3)
 
-    plt.errorbar(results_OB["thresholds"], results_OB["fractal_dimension"], 
-                yerr=results_OB["sigma_D"], fmt='s--', 
-                label="Orion B", color='darkorange', markersize=6, markerfacecolor='none', capsize=3)
+        plt.errorbar(results_OB["thresholds"], results_OB["fractal_dimension"], 
+                yerr=results_OB["sigma_D"], fmt='s', 
+                    label="Orion B", color='darkorange', markersize=6, markerfacecolor='none', capsize=3)
+    else:
+        plt.plot(results_OA["thresholds"], results_OA["fractal_dimension"], 
+            'o', label="Orion A", color='steelblue', markersize=6, markerfacecolor='none')
+
+        plt.plot(results_OB["thresholds"], results_OB["fractal_dimension"], 
+            's', label="Orion B", color='darkorange', markersize=6, markerfacecolor='none')
 
     # Title and labels
     plt.title("Fractal Dimension vs. Column Density Threshold", fontweight='bold', fontsize=15, pad=15)
@@ -526,7 +536,121 @@ def plot_map_at_thresholds(data, thresholds = None):
             plt.figure(figsize=(10, 8))
             plt.imshow(masked_data, vmin=min_value, vmax=max_value, origin='lower', cmap='inferno', interpolation=None)
 
-            plt.title(f"Map with Threshold {threshold:.2e}", fontweight='bold')
+            plt.title(f"Map at Threshold {threshold:.2e}", fontweight='bold')
             plt.colorbar(label="Column Density")
             plt.tight_layout()
             plt.show()
+
+def plot_maps_with_contours_OA(N_H2, wcs, thresholds):
+      # low, transition, high
+    colors = ['#1f77b4', '#f3f554', '#fb366e']  # blue, orange, red
+
+    fig = plt.figure(figsize=(16, 16))
+    ax = fig.add_subplot(111, projection=wcs)
+
+    # show the base map
+    im = ax.imshow(N_H2, origin='lower', cmap='Grays',
+                vmin=np.nanpercentile(N_H2, 5),
+                vmax=np.nanpercentile(N_H2, 99))
+    ax.set_title('Column Density with Threshold Contours - Orion A', fontsize = 18)
+    ax.coords[0].set_axislabel('RA [deg]', fontsize = 18)
+    ax.coords[1].set_axislabel('Dec [deg]', fontsize = 18)
+
+    # draw the contours and keep handles for legend
+    handles = []
+    for thr, col in zip(thresholds, colors):
+        cs = ax.contour(N_H2, levels=[thr], colors=[col],
+                        linewidths=1.5, alpha=0.75)
+        # create a proxy line for legend
+        line = mlines.Line2D([], [], color=col, linewidth=2,
+                            label=f"$N = {thr:.2e}$")
+        handles.append(line)
+
+    # add a custom legend (top left)
+    legend = ax.legend(handles=handles, loc='upper left', fontsize=15)
+    # make legend text black
+    for text in legend.get_texts():
+        text.set_color("black")
+
+    lat_center = -19 * u.deg  # adjust if your map is centered elsewhere
+    lon_min = 207 * u.deg
+    lon_max = 215.0 * u.deg
+
+    # Convert world coordinates to pixel coordinates
+    x_min_pix, _ = wcs.world_to_pixel(SkyCoord(lon_min, lat_center, frame='galactic'))
+    x_max_pix, _ = wcs.world_to_pixel(SkyCoord(lon_max, lat_center, frame='galactic'))
+    ax.set_xlim(x_max_pix, x_min_pix) 
+
+    lat_min = -20.5 * u.deg
+    lat_max = -17.7 * u.deg
+
+    lon_center = 211 * u.deg  # pick roughly the middle of your longitude range
+
+    _, y_min_pix = wcs.world_to_pixel(SkyCoord(lon_center, lat_min, frame='galactic'))
+    _, y_max_pix = wcs.world_to_pixel(SkyCoord(lon_center, lat_max, frame='galactic'))
+
+    ax.set_ylim(y_min_pix, y_max_pix) 
+
+    plt.tight_layout()
+    plt.show()
+
+def plot_maps_with_contours_OB(N_H2, wcs, thresholds):
+
+    colors = ['#1f77b4', '#f3f554', '#fb366e']  # blue, orange, red
+
+    fig = plt.figure(figsize=(12, 12))
+    ax = fig.add_subplot(111, projection=wcs)
+
+    # show the base map
+    im = ax.imshow(N_H2, origin='lower', cmap='Grays',
+                vmin=np.nanpercentile(N_H2, 5),
+                vmax=np.nanpercentile(N_H2, 99))
+    ax.set_title('Column Density with Threshold Contours - Orion B', fontsize = 18)
+    ax.coords[0].set_axislabel('RA [deg]', fontsize = 18)
+    ax.coords[1].set_axislabel('Dec [deg]', fontsize = 18)
+
+    # draw the contours and keep handles for legend
+    handles = []
+    for thr, col in zip(thresholds, colors):
+        cs = ax.contour(N_H2, levels=[thr], colors=[col],
+                        linewidths=1.5, alpha=0.75)
+        # create a proxy line for legend
+        line = mlines.Line2D([], [], color=col, linewidth=2,
+                            label=f"$N = {thr:.2e}$")
+        handles.append(line)
+
+    # add a custom legend (top left)
+    legend = ax.legend(handles=handles, loc='upper left', fontsize=15)
+    # make legend text black
+    for text in legend.get_texts():
+        text.set_color("black")
+
+    # add colorbar
+    # cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    # cbar.set_label(r'$N_{\mathrm{H_2}}$ [cm$^{-2}$]')
+
+    # plt.savefig("figures/gallery_thresholds_OA.png", dpi=300)
+
+    lat_min = -17 * u.deg
+    lat_max = -13 * u.deg
+
+    lon_center = 206 * u.deg  # pick roughly the middle of your longitude range
+
+    _, y_min_pix = wcs.world_to_pixel(SkyCoord(lon_center, lat_min, frame='galactic'))
+    _, y_max_pix = wcs.world_to_pixel(SkyCoord(lon_center, lat_max, frame='galactic'))
+
+    ax.set_ylim(y_min_pix, y_max_pix) 
+
+    # Desired longitude limits (with some representative latitude, e.g. center of your map)
+    lat_center = -14.5 * u.deg  # adjust if your map is centered elsewhere
+    lon_min = 204 * u.deg
+    lon_max = 209 * u.deg
+
+    # Convert world coordinates to pixel coordinates
+    x_min_pix, _ = wcs.world_to_pixel(SkyCoord(lon_min, lat_center, frame='galactic'))
+    x_max_pix, _ = wcs.world_to_pixel(SkyCoord(lon_max, lat_center, frame='galactic'))
+
+    ax.set_xlim(x_max_pix, x_min_pix) 
+
+    plt.tight_layout()
+    plt.show()
