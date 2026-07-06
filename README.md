@@ -9,7 +9,7 @@ Repository for the software and analysis of column density maps within the frame
 
 ### First Paper: focus on Global Fractal Dimension in Orion A and B
 - [ ] Error bars and analysis
-- [ ] YSO Plot and numbers (x-axis: N(H $_2$), y-axis: number of class 0/1 stars)
+- [x] YSO Plot and numbers (x-axis: N(H $_2$), y-axis: number of class 0/1 stars)
 - [ ] Why the difference in Orion A and B?
 - [ ] Review analysis of applied methods (validity, interpretation, down-to-Earth examples)
 
